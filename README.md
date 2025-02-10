@@ -1,5 +1,5 @@
 ### **📌 README.md – ISMS Document Manager (Shiny App)**
-```md
+
 # ISMS Document Manager 📄✨
 
 ## Overview
@@ -105,6 +105,3 @@ For major changes, please open an **issue first** to discuss what you'd like to 
 ---
 
 ### 🚀 Happy Editing & Managing ISMS Policies! 🎯
-```
-
----
