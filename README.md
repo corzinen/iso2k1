@@ -1,5 +1,3 @@
-Sure! Below is a **professional `README.md`** file that provides a **clear project description, installation instructions, usage guide, and contribution guidelines** for your **ISMS Document Manager Shiny App**. This will make it easy for others to install, run, and contribute to the project when uploaded to **GitHub**.
-
 ---
 
 ### **📌 README.md – ISMS Document Manager (Shiny App)**
@@ -108,38 +106,7 @@ For major changes, please open an **issue first** to discuss what you'd like to 
 
 ---
 
-## 📝 License
-This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
-
----
-
-## 📧 Contact & Support
-For questions or support, feel free to **open an issue** on GitHub or reach out via email:  
-📩 **your.email@example.com**  
-
----
-
 ### 🚀 Happy Editing & Managing ISMS Policies! 🎯
 ```
 
 ---
-
-### **💡 Why This `README.md` is Professional & Effective**
-✔ **Clear project purpose** – Describes **what the app does**  
-✔ **Simple installation guide** – Step-by-step **installation & dependencies**  
-✔ **Comprehensive usage guide** – Covers **editing, exporting, printing, and theming**  
-✔ **Project structure overview** – Helps developers understand the file organization  
-✔ **Contribution guidelines** – Encourages **community involvement**  
-✔ **Support & Contact Info** – Provides a way for users to get help  
-
----
-
-### **✅ Next Steps**
-1. **Add this `README.md` file to your GitHub repository**
-2. **Update the repository link & email** in the README
-3. **Commit & push the changes**
-   ```sh
-   git add README.md
-   git commit -m "Added professional README"
-   git push origin main
-   ```
