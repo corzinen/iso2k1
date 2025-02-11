@@ -3,7 +3,7 @@
 ---
 
 **Document Version:** 1.0  
-**Date:** [Insert Date]  
+**Date:** [Date]  
 **Owner:** [ISMS Manager or Responsible Person]  
 **Approved By:** [Senior Management]  
 
