@@ -3,26 +3,27 @@
 # ISMS Document Manager 📄✨
 
 ## Overview
-The **ISMS Document Manager** is an **R Shiny application** designed to manage, edit, and render **Information Security Management System (ISMS) documents**. The app supports **Markdown (`.md`), R Markdown (`.Rmd`), and plain text (`.txt`) files**, allowing users to:
-- View and edit ISMS documents
-- Live-preview **Markdown and R Markdown** files
-- Save changes directly within the app
-- Export documents as **PDF, HTML, and Word (`.docx`)**
-- Print documents using a built-in print feature
-- Customize the UI with **dynamic theming (Bootswatch)**
-- Use an intuitive **modern interface powered by `bslib::page_navbar`**
+The **ISMS Document Manager** is a **secure, theme-customizable, and real-time updating** R Shiny application for managing **Information Security Management System (ISMS) documents**. It supports **Markdown (`.md`), R Markdown (`.Rmd`), and plain text (`.txt`)** files, allowing users to:
+- **View, edit, and live-preview ISMS documents**
+- **Export documents as PDF, HTML, and Word (`.docx`)**
+- **Use authentication & role-based access (admins vs. users)**
+- **Log all user activity (document edits, logins, exports)**
+- **Enable live theme switching (Bootswatch themes)**
+- **Get real-time notifications for actions**
+- **Print documents directly from the app**
 
 ## Features 🚀
-✅ **Edit & Manage Documents** – Modify `.txt`, `.md`, and `.Rmd` files directly in the app  
-✅ **Live Markdown Preview** – Render and view formatted ISMS policies in real time  
-✅ **Export to Multiple Formats** – Download ISMS documents as **PDF, HTML, or Word**  
-✅ **Print Functionality** – Open print dialogs directly from the app  
-✅ **Dynamic Themes** – Change UI themes using **Bootswatch themes**  
-✅ **Secure Document Handling** – Reads and writes from a dedicated `documents/` directory  
+✅ **Live Editing & Preview** – Edit and preview Markdown documents in real time  
+✅ **Export & Print Support** – Save documents as **PDF, HTML, or Word**  
+✅ **Secure Authentication** – Uses `shinymanager` for **user login & role-based access**  
+✅ **Admin Controls** – Admins can **add users** and manage **permissions**  
+✅ **Activity Logging** – Tracks **logins, edits, exports**, and **admin actions**  
+✅ **Customizable Themes** – Users can **switch themes live** with **Bootswatch**  
+✅ **Real-time Notifications** – Uses `showNotification()` for **instant feedback**  
 
 ---
 
-## 📥 Installation
+## **📥 Installation**
 
 ### **1️⃣ Prerequisites**
 Ensure you have the following installed:
@@ -33,7 +34,8 @@ Ensure you have the following installed:
 ### **2️⃣ Install Required R Packages**
 Open R or RStudio and run:
 ```r
-install.packages(c("shiny", "shinythemes", "rmarkdown", "markdown", "bslib", "bsicons"))
+install.packages(c("shiny", "shinythemes", "rmarkdown", "markdown", 
+                   "bslib", "bsicons", "DBI", "RSQLite", "shinymanager"))
 ```
 
 ### **3️⃣ Clone the Repository**
@@ -80,13 +82,71 @@ Or manually **download the ZIP** and extract it.
 
 ---
 
-## 🏗 Project Structure
+## **🔐 Authentication & User Roles**
+This app uses `shinymanager` for **secure authentication**.  
+| Role | Permissions |
+|------|------------|
+| **Admin** | Can **add users, edit all documents, manage access** |
+| **User** | Can **only edit & export documents** |
+
+#### **🛠 Creating an Admin Account (First-Time Setup)**
+If you're setting up the app for the first time, run:
+```r
+library(shinymanager)
+
+# Define user credentials
+credentials <- data.frame(
+  user = c("admin", "user1"),
+  password = sapply(c("admin123", "userpass"), password_store),  # Hash passwords
+  admin = c(TRUE, FALSE),  # Admin role (TRUE/FALSE)
+  stringsAsFactors = FALSE
+)
+
+# Save credentials in a secure database
+create_db(
+  credentials_data = credentials,
+  sqlite_path = "credentials.sqlite"
+)
+```
+Now log in with:
+- **Admin:** `admin / admin123`
+- **User:** `user1 / userpass`
+
+---
+
+## **🎨 Live Theme Customization**
+Users can **switch themes instantly** using **Bootswatch**!  
+Choose from: `Flatly`, `Minty`, `Darkly`, `Cyborg`, `Journal`, `Litera`, `Lux`, `Materia`, `Pulse`, `Sandstone`, `Simplex`, `Sketchy`, `Slate`, `Solar`, `Spacelab`, `Superhero`, `United`, `Yeti`.
+
+---
+
+## **📊 Activity Logging**
+All user actions are logged in **`logs.sqlite`**:
+- **Logins & Logouts**
+- **Document Loads & Saves**
+- **Exports & Prints**
+- **Admin User Additions**
+
+### **🛠 Viewing Logs**
+Admins can **view logs** by running:
+```r
+db <- DBI::dbConnect(RSQLite::SQLite(), "logs.sqlite")
+logs <- dbGetQuery(db, "SELECT * FROM logs ORDER BY timestamp DESC")
+print(logs)
+dbDisconnect(db)
+```
+
+---
+
+## **🛠 Project Structure**
 ```
 ISMS-Document-Manager/
 │-- documents/           # Directory containing ISMS files (Markdown, R Markdown, TXT)
 │-- app.R                # Main Shiny app script
 │-- README.md            # Project documentation
 │-- .gitignore           # Ignore unnecessary files (e.g., R history, temp files)
+│-- credentials.sqlite   # User authentication database
+│-- logs.sqlite          # Logs database (tracks activity)
 │-- LICENSE              # License file (optional)
 ```
 
@@ -105,3 +165,24 @@ For major changes, please open an **issue first** to discuss what you'd like to 
 ---
 
 ### 🚀 Happy Editing & Managing ISMS Policies! 🎯
+
+---
+
+### **💡 What’s New in This Update?**
+✔ **Added Authentication & Roles Section** – Covers **admin/user permissions**  
+✔ **Live Theme Customization Guide** – Explains **Bootswatch integration**  
+✔ **Updated Logging Section** – Shows **how to view logs**  
+✔ **Updated Installation & Setup** – Includes **database setup for first-time users**  
+✔ **Clearer Project Structure** – Organized **files and folders**  
+
+---
+
+### **🚀 Next Steps**
+1. **Add this `README.md` file to your GitHub repository**
+2. **Update the repository link & email** in the README
+3. **Commit & push the changes**
+   ```sh
+   git add README.md
+   git commit -m "Updated README with authentication, logging, and theming details"
+   git push origin main
+   ```
