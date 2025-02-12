@@ -1,4 +1,4 @@
-# **Information Security Policy**  
+## **Information Security Policy**  
 
 ---
 
@@ -9,12 +9,12 @@
 
 ---
 
-## **1. Purpose**  
+### **1. Purpose**  
 The purpose of this **Information Security Policy** is to establish a framework for managing information security within [Company Name]. This policy ensures that security risks associated with the **Microsoft Azure tenant**—used as a **landing zone for the development, deployment, and delivery of company-developed applications to customers**—are effectively managed in compliance with **ISO 27001** and other relevant regulatory requirements.  
 
 ---
 
-## **2. Scope**  
+### **2. Scope**  
 This policy applies to:  
 - All **information systems, applications, and services** hosted within the **Microsoft Azure** environment.  
 - All **employees, contractors, and third parties** who access or manage the Azure environment.  
@@ -24,7 +24,7 @@ This policy covers all aspects of **cloud security, data protection, identity ma
 
 ---
 
-## **3. Information Security Objectives**  
+### **3. Information Security Objectives**  
 To ensure the security of applications and data within Azure, [Company Name] commits to the following objectives:  
 
 1. **Protect the Confidentiality, Integrity, and Availability (CIA) of Information** within the Azure cloud.  
@@ -35,7 +35,7 @@ To ensure the security of applications and data within Azure, [Company Name] com
 
 ---
 
-## **4. Information Security Principles**  
+### **4. Information Security Principles**  
 To achieve these objectives, the following principles apply:  
 
 - **Risk-Based Approach:** Security controls in Azure must be implemented based on identified risks.  
@@ -46,7 +46,7 @@ To achieve these objectives, the following principles apply:
 
 ---
 
-## **5. Security Policies and Controls**  
+### **5. Security Policies and Controls**  
 
 ### **5.1 Access Control**  
 - **Multi-Factor Authentication (MFA)** must be enforced for all Azure administrators.  
@@ -89,8 +89,8 @@ To achieve these objectives, the following principles apply:
 
 ## **7. Roles & Responsibilities**  
 
-| **Role**               | **Responsibility** |
-|------------------------|-------------------|
+| **Role**          | **Responsibility** |
+|-----------|-------------------|
 | **Executive Management** | Provide strategic oversight and approve security policies. |
 | **ISMS Manager** | Maintain and enforce the ISMS. |
 | **Azure Security Team** | Implement and monitor security controls in Azure. |

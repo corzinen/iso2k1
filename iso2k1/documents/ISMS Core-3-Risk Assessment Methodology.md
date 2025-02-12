@@ -145,7 +145,7 @@ Each identified risk will be treated using one of the following approaches:
 ## **4. Roles & Responsibilities**  
 
 | **Role**               | **Responsibility** |
-|------------------------|-------------------|
+|-------------|-------------------|
 | **Executive Management** | Approves risk treatment plans and provides oversight |
 | **ISMS Manager** | Manages risk assessment and ensures compliance |
 | **Cloud Security Team** | Implements and monitors security controls |

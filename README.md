@@ -1,5 +1,3 @@
-### **📌 README.md – ISMS Document Manager (Shiny App)**
-
 # ISMS Document Manager 📄✨
 
 ## Overview
@@ -11,9 +9,11 @@ The **ISMS Document Manager** is a **secure, theme-customizable, and real-time u
 - **Enable live theme switching (Bootswatch themes)**
 - **Get real-time notifications for actions**
 - **Print documents directly from the app**
+- **Automatically generate and navigate via a Table of Contents (TOC)**
 
 ## Features 🚀
 ✅ **Live Editing & Preview** – Edit and preview Markdown documents in real time  
+✅ **Table of Contents (TOC)** – Automatically generated & clickable for easy navigation  
 ✅ **Export & Print Support** – Save documents as **PDF, HTML, or Word**  
 ✅ **Secure Authentication** – Uses `shinymanager` for **user login & role-based access**  
 ✅ **Admin Controls** – Admins can **add users** and manage **permissions**  
@@ -27,9 +27,10 @@ The **ISMS Document Manager** is a **secure, theme-customizable, and real-time u
 
 ### **1️⃣ Prerequisites**
 Ensure you have the following installed:
-- **R** (≥ 4.0) – [Download here](https://cran.r-project.org/)
-- **RStudio** (Recommended) – [Download here](https://posit.co/downloads/)
-- **Pandoc** (for document rendering) – Included with RStudio or install from [here](https://pandoc.org/installing.html)
+
+- **R** (≥ 4.0) – [Download here](https://cran.r-project.org/)  
+- **RStudio** (Recommended) – [Download here](https://posit.co/downloads/)  
+- **Pandoc** (for document rendering) – Included with RStudio or install from [here](https://pandoc.org/installing.html)  
 
 ### **2️⃣ Install Required R Packages**
 Open R or RStudio and run:
@@ -80,14 +81,18 @@ Or manually **download the ZIP** and extract it.
 ### **5️⃣ Changing Themes**
 - Select a new **theme** from the **dropdown** to change the app’s appearance instantly  
 
+### **6️⃣ Navigating with Table of Contents (TOC)**
+- If the document has **`# Headings`**, a **clickable TOC** is generated  
+- Clicking on TOC links **scrolls smoothly** to the relevant section  
+
 ---
 
 ## **🔐 Authentication & User Roles**
 This app uses `shinymanager` for **secure authentication**.  
-| Role | Permissions |
-|------|------------|
-| **Admin** | Can **add users, edit all documents, manage access** |
-| **User** | Can **only edit & export documents** |
+Role / Permissions 
+
+**Admin** -- Can **add users, edit all documents, manage access**   
+**User** -- Can **only edit & export documents** 
 
 #### **🛠 Creating an Admin Account (First-Time Setup)**
 If you're setting up the app for the first time, run:
@@ -109,8 +114,9 @@ create_db(
 )
 ```
 Now log in with:
-- **Admin:** `admin / admin123`
-- **User:** `user1 / userpass`
+
+- **Admin:** `admin / admin123` 
+- **User:** `user1 / userpass` 
 
 ---
 
@@ -122,10 +128,11 @@ Choose from: `Flatly`, `Minty`, `Darkly`, `Cyborg`, `Journal`, `Litera`, `Lux`, 
 
 ## **📊 Activity Logging**
 All user actions are logged in **`logs.sqlite`**:
-- **Logins & Logouts**
-- **Document Loads & Saves**
-- **Exports & Prints**
-- **Admin User Additions**
+
+- **Logins & Logouts** 
+- **Document Loads & Saves** 
+- **Exports & Prints** 
+- **Admin User Additions** 
 
 ### **🛠 Viewing Logs**
 Admins can **view logs** by running:
@@ -147,18 +154,19 @@ ISMS-Document-Manager/
 │-- .gitignore           # Ignore unnecessary files (e.g., R history, temp files)
 │-- credentials.sqlite   # User authentication database
 │-- logs.sqlite          # Logs database (tracks activity)
-│-- LICENSE              # License file (optional)
+
 ```
 
 ---
 
 ## 🤝 Contributing
-We welcome contributions! Here's how you can help:
-1. **Fork the repository** on GitHub
-2. **Create a feature branch** (`git checkout -b feature-branch`)
-3. **Commit your changes** (`git commit -m "Added new feature"`)
-4. **Push to your branch** (`git push origin feature-branch`)
-5. **Open a pull request** 🎉
+Contributions are welcome! Here's how you can help: 
+
+1. **Fork the repository** on GitHub 
+2. **Create a feature branch** (`git checkout -b feature-branch`) 
+3. **Commit your changes** (`git commit -m "Added new feature"`) 
+4. **Push to your branch** (`git push origin feature-branch`) 
+5. **Open a pull request** 🎉 
 
 For major changes, please open an **issue first** to discuss what you'd like to implement.
 
@@ -169,20 +177,10 @@ For major changes, please open an **issue first** to discuss what you'd like to 
 ---
 
 ### **💡 What’s New in This Update?**
-✔ **Added Authentication & Roles Section** – Covers **admin/user permissions**  
+✔ **Added Table of Contents (TOC) Support** – Clickable TOC for easy navigation  
 ✔ **Live Theme Customization Guide** – Explains **Bootswatch integration**  
 ✔ **Updated Logging Section** – Shows **how to view logs**  
 ✔ **Updated Installation & Setup** – Includes **database setup for first-time users**  
 ✔ **Clearer Project Structure** – Organized **files and folders**  
 
 ---
-
-### **🚀 Next Steps**
-1. **Add this `README.md` file to your GitHub repository**
-2. **Update the repository link & email** in the README
-3. **Commit & push the changes**
-   ```sh
-   git add README.md
-   git commit -m "Updated README with authentication, logging, and theming details"
-   git push origin main
-   ```

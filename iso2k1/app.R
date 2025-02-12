@@ -116,16 +116,103 @@ server <- function(input, output, session) {
   })
   
   # Live-render Markdown content
+  # output$rendered_doc <- renderUI({
+  #   req(input$selected_doc)
+  #   ext <- tools::file_ext(input$selected_doc)
+  #   
+  #   if (ext %in% c("md", "Rmd")) {
+  #     temp_file <- tempfile(fileext = paste0(".", ext))
+  #     
+  #     # Add YAML Metadata (Enable Floating TOC)
+  #     yaml_metadata <- paste0(
+  #       "---\n",
+  #       "title: \"", input$selected_doc, "\"\n",  # Set a valid title dynamically
+  #       "output:\n",
+  #       "  html_document:\n",
+  #       "    toc: true\n",
+  #       "    toc_float: false\n",
+  #       "    toc_depth: 3\n",
+  #       "    number_sections: false\n",
+  #       "---\n"
+  #     )
+  #     
+  #     # Write Metadata + Document Content to Temp File
+  #     writeLines(c(yaml_metadata, doc_content()), temp_file)
+  #     
+  #     # Render Markdown to a Temporary HTML File
+  #     rendered_html <- tempfile(fileext = ".html")
+  #     rmarkdown::render(temp_file, output_format = "html_document", output_file = rendered_html, quiet = TRUE)
+  #     
+  #     # Read the entire HTML content
+  #     html_content <- readLines(rendered_html, warn = FALSE)
+  #     
+  #     # Find relevant parts of the HTML
+  #     start_html <- grep("<html", html_content)
+  #     end_html <- grep("</html>", html_content)
+  #     
+  #     # Extract the entire document (to keep JavaScript & TOC styles)
+  #     if (length(start_html) > 0 && length(end_html) > 0) {
+  #       clean_html <- paste(html_content[start_html:end_html], collapse = "\n")
+  #     } else {
+  #       clean_html <- paste(html_content, collapse = "\n")  # Fallback if extraction fails
+  #     }
+  #     
+  #     HTML(clean_html)  # Render full HTML to ensure floating TOC works
+  #   } else {
+  #     HTML("<p><i>Rendering is only available for Markdown files.</i></p>")
+  #   }
+  # })
   output$rendered_doc <- renderUI({
     req(input$selected_doc)
     ext <- tools::file_ext(input$selected_doc)
     
     if (ext %in% c("md", "Rmd")) {
-      HTML(markdownToHTML(text = doc_content(), options = "fragment_only"))  # Reactively updates live
+      temp_file <- tempfile(fileext = paste0(".", ext))
+      
+      # YAML Metadata (Enable TOC)
+      yaml_metadata <- "---\ntitle: 't'\noutput:\n  html_document:\n    toc: true\n    toc_depth: 3\n    number_sections: false\n---\n"
+      
+      # Write Metadata + Document Content to Temp File
+      writeLines(c(yaml_metadata, doc_content()), temp_file)
+      
+      # Render Markdown to a Temporary HTML File
+      rendered_html <- tempfile(fileext = ".html")
+      rmarkdown::render(temp_file, output_format = "html_document", output_file = rendered_html, quiet = TRUE)
+      
+      # Read rendered HTML content
+      html_content <- readLines(rendered_html, warn = FALSE)
+      
+      # Extract TOC & Document Content (Avoid Full Page Styling)
+      start_body <- grep("<body>", html_content)
+      end_body <- grep("</body>", html_content)
+      
+      if (length(start_body) > 0 && length(end_body) > 0) {
+        body_content <- html_content[(start_body+1):(end_body-1)]
+        
+        # ✅ Ensure TOC links correctly reference section IDs
+        # This preserves the default IDs and prevents breaking navigation
+        body_content <- gsub("id=\"(.*)\"", "id=\"\\1\" name=\"\\1\"", body_content)
+        
+        # Remove the auto-generated title
+        body_content <- gsub("<h1[^>]*>.*?</h1>", "", body_content)
+        
+        # Wrap in a div to ensure proper layout
+        clean_html <- paste(c(
+          "<div style='max-width: 1200px; margin: auto;'>",  # Keep layout neat
+          body_content,  # Includes TOC + document content
+          "<script>document.addEventListener('DOMContentLoaded', function() {document.querySelectorAll('a[href^=\"#\"]').forEach(anchor => {anchor.addEventListener('click', function(e) {e.preventDefault();document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' }); });});});</script>",  # Fix scrolling
+          "</div>"
+        ), collapse = "\n")
+      } else {
+        clean_html <- paste(html_content, collapse = "\n")  # Fallback if extraction fails
+      }
+      
+      HTML(clean_html)  # Render only TOC + Content, no title
     } else {
       HTML("<p><i>Rendering is only available for Markdown files.</i></p>")
     }
   })
+  
   
   # Save document changes
   observeEvent(input$save_doc, {
@@ -169,7 +256,8 @@ server <- function(input, output, session) {
       title = "Print Document",
       HTML(markdownToHTML(text = input$doc_content, options = "fragment_only")),
       footer = modalButton("Close"),
-      easyClose = TRUE
+      easyClose = TRUE,
+      size = "xl"
     ))
   })
   
