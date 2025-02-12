@@ -35,6 +35,7 @@ log_action <- function(user, action, details = "") {
 # UI
 ui <- secure_app(
   enable_admin = TRUE,
+  fab_position = "top-right",
   page_navbar(
     theme = bs_theme(bootswatch = "flatly"),  # Default theme
     title = "ISMS Document Manager",
@@ -45,7 +46,10 @@ ui <- secure_app(
       h5("Document Editor"),
       textAreaInput("doc_content", "Edit the document:", value = "", rows = 10, width = "100%"),
       h5("Rendered Preview"),
-      card(uiOutput("rendered_doc"))
+      card(
+        full_screen = TRUE,
+        uiOutput("rendered_doc")
+        )
     ),
     
     sidebar = sidebar(
@@ -63,8 +67,7 @@ ui <- secure_app(
       # theme picker
       selectInput("theme", "Select Theme", 
                   choices = c("Flatly", "Minty", "Darkly", "Cyborg", "Journal", "Litera", "Lux", "Materia", "Pulse", "Sandstone", "Simplex", "Sketchy", "Slate", "Solar", "Spacelab", "Superhero", "United", "Yeti"),
-                  selected = "Flatly"),
-      
+                  selected = "Flatly")
     )
   )
 )
