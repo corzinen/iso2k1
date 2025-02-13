@@ -1,0 +1,40 @@
+---
+title: "Interactive Shiny Dashboard"
+output: html_document
+runtime: shiny
+---
+
+#### 📊 Live Updating Plotly Chart
+
+```{r plotly_chart, echo=FALSE, fig.height=5, message=FALSE, warning=FALSE}
+library(shiny)
+library(plotly)
+library(bslib)
+
+ui <- fluidPage(
+  sliderInput("bins", "Number of Bins:", min = 5, max = 50, value = 20), plotlyOutput("plot")
+)
+server <- function(input, output, session) {
+  output$plot <- renderPlotly({
+    plot_ly(x = rnorm(500), type = "histogram", nbinsx = input$bins)
+  })
+}
+shinyApp(ui, server)
+```
+
+```{r table, echo=FALSE, fig.height=10, message=FALSE, warning=FALSE}
+library(DT)
+
+ui <- fluidPage(
+datatable(mtcars, options = list(pageLength = 5))
+)
+server <- function(input, output, session) {
+}
+shinyApp(ui, server)
+```
+
+```{r}
+data <- faithful[1:4, ]
+knitr::kable(data,
+ caption = "Table with kable")
+```

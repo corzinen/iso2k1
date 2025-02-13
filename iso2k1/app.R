@@ -38,14 +38,13 @@ ui <- secure_app(
   fab_position = "top-right",
   page_navbar(
     theme = bs_theme(bootswatch = "flatly"),  # Default theme
-    title = "ISMS Document Manager",
-    window_title = "ISMS Document Manager",
+    title = "Markdown Document Manager",
+    window_title = "Markdown Document Manager",
     
     nav_panel(
       "Editor",
-      h5("Document Editor"),
       textAreaInput("doc_content", "Edit the document:", value = "", rows = 10, width = "100%"),
-      h5("Rendered Preview"),
+      h6("Rendered Preview"),
       card(
         full_screen = TRUE,
         uiOutput("rendered_doc")
@@ -53,18 +52,36 @@ ui <- secure_app(
     ),
     
     sidebar = sidebar(
-      h4("Select a Document"),
-      selectInput("selected_doc", "Choose a document:",
-                  choices = list.files(docs_folder, pattern = "\\.(Rmd|md|txt)$", full.names = FALSE)),
-      actionButton("load_doc", "Load Document"),
-      hr(),
+      accordion(
+        accordion_panel(
+          title = "Select a Document",
+          selectInput("selected_doc", "Choose a document:",
+                      choices = list.files(docs_folder, pattern = "\\.(Rmd|md|txt)$", full.names = FALSE)),
+          actionButton("load_doc", "Load Document")
+          ),
+        accordion_panel(
+          title = "Create a New Document",
+          textInput("new_file_name", "File Name (without extension):"),
+          selectInput("new_file_type", "File Type:", choices = c("Markdown (.md)" = "md", "R Markdown (.Rmd)" = "Rmd", "Text File (.txt)" = "txt")),
+          actionButton("create_file", "Create File", class = "btn-success")
+        ),
+        accordion_panel(
+          title="Upload a New Document",
+          fileInput("upload_file", "Choose a .Rmd file:", accept = c(".Rmd")),
+          actionButton("upload_btn", "Upload", class = "btn-success"),
+        )
+      ),
       actionButton("save_doc", "Save Changes", class = "btn-primary"),
       hr(),
+      actionButton("delete_doc", "Delete File", class = "btn-danger"),
+      hr(),
+      
       h4("Export / Print"),
       downloadButton("export_html", "Download HTML"),
       downloadButton("export_docx", "Download Word"),
       actionButton("print_doc", "Print Document", class = "btn-secondary"),
-      # theme picker
+      
+      # Theme picker
       selectInput("theme", "Select Theme", 
                   choices = c("Flatly", "Minty", "Darkly", "Cyborg", "Journal", "Litera", "Lux", "Materia", "Pulse", "Sandstone", "Simplex", "Sketchy", "Slate", "Solar", "Spacelab", "Superhero", "United", "Yeti"),
                   selected = "Flatly")
@@ -118,102 +135,167 @@ server <- function(input, output, session) {
     doc_content(input$doc_content)  # Update reactive content
   })
   
+  # Handle file uploads
+  observeEvent(input$upload_btn, {
+    req(input$upload_file)  # Ensure a file is selected
+    
+    # Get file details
+    temp_path <- input$upload_file$datapath
+    file_name <- input$upload_file$name
+    dest_path <- file.path(docs_folder, file_name)
+    
+    # Check if file already exists
+    if (file.exists(dest_path)) {
+      showNotification("File already exists! Choose a different name.", type = "error")
+    } else {
+      # Move uploaded file to documents folder
+      file.copy(temp_path, dest_path)
+      
+      # Update file selector choices
+      updateSelectInput(session, "selected_doc", choices = list.files(docs_folder, pattern = "\\.(Rmd|md|txt)$", full.names = FALSE))
+      
+      # Log action and notify user
+      log_action(user_info(), "Upload File", paste("Uploaded:", file_name))
+      showNotification("File uploaded successfully!", type = "message")
+    }
+  })
+  
   # Live-render Markdown content
-  # output$rendered_doc <- renderUI({
-  #   req(input$selected_doc)
-  #   ext <- tools::file_ext(input$selected_doc)
-  #   
-  #   if (ext %in% c("md", "Rmd")) {
-  #     temp_file <- tempfile(fileext = paste0(".", ext))
-  #     
-  #     # Add YAML Metadata (Enable Floating TOC)
-  #     yaml_metadata <- paste0(
-  #       "---\n",
-  #       "title: \"", input$selected_doc, "\"\n",  # Set a valid title dynamically
-  #       "output:\n",
-  #       "  html_document:\n",
-  #       "    toc: true\n",
-  #       "    toc_float: false\n",
-  #       "    toc_depth: 3\n",
-  #       "    number_sections: false\n",
-  #       "---\n"
-  #     )
-  #     
-  #     # Write Metadata + Document Content to Temp File
-  #     writeLines(c(yaml_metadata, doc_content()), temp_file)
-  #     
-  #     # Render Markdown to a Temporary HTML File
-  #     rendered_html <- tempfile(fileext = ".html")
-  #     rmarkdown::render(temp_file, output_format = "html_document", output_file = rendered_html, quiet = TRUE)
-  #     
-  #     # Read the entire HTML content
-  #     html_content <- readLines(rendered_html, warn = FALSE)
-  #     
-  #     # Find relevant parts of the HTML
-  #     start_html <- grep("<html", html_content)
-  #     end_html <- grep("</html>", html_content)
-  #     
-  #     # Extract the entire document (to keep JavaScript & TOC styles)
-  #     if (length(start_html) > 0 && length(end_html) > 0) {
-  #       clean_html <- paste(html_content[start_html:end_html], collapse = "\n")
-  #     } else {
-  #       clean_html <- paste(html_content, collapse = "\n")  # Fallback if extraction fails
-  #     }
-  #     
-  #     HTML(clean_html)  # Render full HTML to ensure floating TOC works
-  #   } else {
-  #     HTML("<p><i>Rendering is only available for Markdown files.</i></p>")
-  #   }
-  # })
   output$rendered_doc <- renderUI({
     req(input$selected_doc)
     ext <- tools::file_ext(input$selected_doc)
     
-    if (ext %in% c("md", "Rmd")) {
-      temp_file <- tempfile(fileext = paste0(".", ext))
+    if (ext == "Rmd") {
+      temp_file <- tempfile(fileext = ".Rmd")
       
-      # YAML Metadata (Enable TOC)
-      yaml_metadata <- "---\ntitle: 't'\noutput:\n  html_document:\n    toc: true\n    toc_depth: 3\n    number_sections: false\n---\n"
+      # Write the R Markdown document to a temp file
+      writeLines(doc_content(), temp_file)
       
-      # Write Metadata + Document Content to Temp File
-      writeLines(c(yaml_metadata, doc_content()), temp_file)
-      
-      # Render Markdown to a Temporary HTML File
+      # Render the R Markdown document to an HTML file
       rendered_html <- tempfile(fileext = ".html")
-      rmarkdown::render(temp_file, output_format = "html_document", output_file = rendered_html, quiet = TRUE)
+      
+      rmarkdown::render(temp_file, 
+                        output_format = "html_document", 
+                        output_file = rendered_html, 
+                        quiet = TRUE, 
+                        envir = new.env(parent = globalenv()))  # Execute in a clean environment
       
       # Read rendered HTML content
       html_content <- readLines(rendered_html, warn = FALSE)
       
-      # Extract TOC & Document Content (Avoid Full Page Styling)
+      # Extract TOC & Body Content (Avoid Full Page Styling)
       start_body <- grep("<body>", html_content)
       end_body <- grep("</body>", html_content)
       
       if (length(start_body) > 0 && length(end_body) > 0) {
         body_content <- html_content[(start_body+1):(end_body-1)]
         
-        # ✅ Ensure TOC links correctly reference section IDs
-        # This preserves the default IDs and prevents breaking navigation
+        # Ensure TOC links work properly
         body_content <- gsub("id=\"(.*)\"", "id=\"\\1\" name=\"\\1\"", body_content)
         
-        # Remove the auto-generated title
-        body_content <- gsub("<h1[^>]*>.*?</h1>", "", body_content)
-        
-        # Wrap in a div to ensure proper layout
+        # Wrap in a div for layout consistency
         clean_html <- paste(c(
-          "<div style='max-width: 1200px; margin: auto;'>",  # Keep layout neat
-          body_content,  # Includes TOC + document content
-          "<script>document.addEventListener('DOMContentLoaded', function() {document.querySelectorAll('a[href^=\"#\"]').forEach(anchor => {anchor.addEventListener('click', function(e) {e.preventDefault();document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' }); });});});</script>",  # Fix scrolling
+          "<div style='max-width: 1200px; margin: auto;'>",
+          body_content,  
+          "<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>",  # Ensure Plotly works
           "</div>"
         ), collapse = "\n")
       } else {
         clean_html <- paste(html_content, collapse = "\n")  # Fallback if extraction fails
       }
       
-      HTML(clean_html)  # Render only TOC + Content, no title
+      return(HTML(clean_html))
+      
+    } else if (ext == "md") {
+      # Handle standard Markdown files
+      return(shiny::includeMarkdown(file.path(docs_folder, input$selected_doc)))
+      
     } else {
-      HTML("<p><i>Rendering is only available for Markdown files.</i></p>")
+      return(HTML("<p><i>Rendering is only available for Markdown (.md) and R Markdown (.Rmd) files.</i></p>"))
     }
+  })
+  
+  # Create a new file
+  observeEvent(input$create_file, {
+    req(input$new_file_name)  # Ensure file name is provided
+    
+    # Construct full file name with extension
+    new_file_path <- file.path(docs_folder, paste0(input$new_file_name, ".", input$new_file_type))
+    
+    # Check if file already exists
+    if (file.exists(new_file_path)) {
+      showNotification("File already exists!", type = "error")
+    } else {
+      # Create the new file with placeholder text
+      default_content <- switch(input$new_file_type,
+                                "md" = "# New Markdown Document\n\nStart writing...",
+                                "Rmd" = "---\ntitle: \"New R Markdown Document\"\noutput: html_document\n---\n\n# Introduction\n\nStart writing...",
+                                "txt" = "New Text File\n\nStart writing...")
+      
+      writeLines(default_content, new_file_path)
+      
+      # Update file selector choices
+      updateSelectInput(session, "selected_doc", choices = list.files(docs_folder, pattern = "\\.(Rmd|md|txt)$", full.names = FALSE))
+      
+      # Automatically select and load the new file
+      updateSelectInput(session, "selected_doc", selected = basename(new_file_path))
+      doc_content(default_content)
+      updateTextAreaInput(session, "doc_content", value = doc_content())
+      
+      # Log action and notify user
+      log_action(user_info(), "Create File", paste("Created:", basename(new_file_path)))
+      showNotification("New file created successfully!", type = "message")
+    }
+  })
+  
+  # Show delete confirmation modal
+  observeEvent(input$delete_doc, {
+    req(input$selected_doc)  # Ensure a file is selected
+    
+    showModal(modalDialog(
+      title = "Confirm File Deletion",
+      p("Enter the file name to confirm deletion:"),
+      textInput("confirm_delete_name", "File Name (without extension):"),
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton("confirm_delete", "Delete", class = "btn-danger")
+      ),
+      easyClose = FALSE
+    ))
+  })
+  
+  # Handle file deletion
+  observeEvent(input$confirm_delete, {
+    req(input$selected_doc, input$confirm_delete_name)
+    
+    # Extract filename without extension
+    selected_file <- input$selected_doc
+    expected_name <- tools::file_path_sans_ext(selected_file)
+    
+    if (input$confirm_delete_name == expected_name) {
+      file_path <- file.path(docs_folder, selected_file)
+      
+      if (file.exists(file_path)) {
+        file.remove(file_path)
+        
+        # Update file selector choices
+        updateSelectInput(session, "selected_doc", choices = list.files(docs_folder, pattern = "\\.(Rmd|md|txt)$", full.names = FALSE), selected = NULL)
+        
+        # Clear the editor
+        doc_content("")
+        updateTextAreaInput(session, "doc_content", value = "")
+        
+        # Log action and notify user
+        log_action(user_info(), "Delete File", paste("Deleted:", selected_file))
+        showNotification("File deleted successfully!", type = "message")
+      } else {
+        showNotification("File not found!", type = "error")
+      }
+    } else {
+      showNotification("File name does not match! Deletion canceled.", type = "error")
+    }
+    
+    removeModal()  # Close the modal
   })
   
   

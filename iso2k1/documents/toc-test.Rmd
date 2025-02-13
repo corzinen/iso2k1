@@ -1,0 +1,63 @@
+---
+title: "Floating TOC Example"
+author: "Your Name"
+date: "2025-02-12"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+
+# Introduction
+
+This is a sample R Markdown document demonstrating how to create a floating table of contents (TOC). With the `toc_float: true` option, the TOC will remain visible as you scroll through the document.
+
+```{r setup, include=FALSE}
+# Set global chunk options
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Section 1: Overview
+
+This section provides an overview of the analysis.
+
+## Subsection 1.1: Background
+
+Provide background information here.
+
+## Subsection 1.2: Objectives
+
+Outline the objectives of your analysis.
+
+# Section 2: Data Analysis
+
+This section demonstrates a simple data analysis example.
+
+```{r data-analysis}
+# Generate some sample data and plot it
+set.seed(123)
+data <- rnorm(100)
+hist(data, main = "Histogram of Sample Data", xlab = "Data Values")
+```
+
+# Section 3: Results
+
+Discuss the results and any findings here.
+
+## Subsection 3.1: Detailed Findings
+
+Go into further details about your findings.
+
+# Section 4: Conclusion
+
+Summarize your conclusions and provide suggestions for future work.
+```
+
+To use this sample:
+
+1. Save the content above into a file with an `.Rmd` extension (e.g., `floating_toc_example.Rmd`).
+2. Open the file in RStudio or your preferred editor.
+3. Knit the document to HTML, and you'll see a floating TOC on the side as you scroll.
+
+Feel free to modify the sections and code chunks to suit your needs!
